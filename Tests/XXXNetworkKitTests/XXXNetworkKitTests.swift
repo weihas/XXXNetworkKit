@@ -1,4 +1,5 @@
 import Testing
+@testable import XXXNetworkModel
 @testable import XXXNetworkKit
 
 @Suite
@@ -19,7 +20,7 @@ struct UserTest {
     
     @Test
     func info() async throws {
-        let user = try await XXXAPIProvider.shared.request(XXXAPI.User.info, to: Model.User.self)
+        let user = try await XXXAPIProvider.shared.request(XXXAPI.User.info, to: User.self)
         #expect(user.openid != nil)
     }
 
