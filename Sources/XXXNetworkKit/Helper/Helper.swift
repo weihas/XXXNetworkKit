@@ -69,7 +69,6 @@ extension MoyaProvider {
 
 extension Encodable {
     
-    /// 转为参数
     func asParameters(encoder: JSONEncoder = .init()) throws -> Parameters {
         let data = try encoder.encode(self)
         let object = try JSONSerialization.jsonObject(with: data, options: [])

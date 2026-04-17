@@ -10,13 +10,16 @@ import Moya
 
 public extension XXXAPI {
     
-    /// 用户管理
+    /// UserManage
     enum User {
         
+        /// https://open.bilibili.com/doc/4/08f935c5-29f1-e646-85a3-0b11c2830558#h1-u67E5u8BE2u7528u6237u5DF2u6388u6743u6743u9650u5217u8868
         case scopes
         
+        /// https://open.bilibili.com/doc/4/feb66f99-7d87-c206-00e7-d84164cd701c#h1-u83B7u53D6u5DF2u6388u6743u7528u6237u57FAu7840u516Cu5F00u4FE1u606F
         case info
         
+        /// https://open.bilibili.com/doc/4/22e9cc93-1559-f262-0375-bdcefe9257ee#h1--union_id-
         case union_id
     }
 }

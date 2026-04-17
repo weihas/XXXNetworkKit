@@ -209,7 +209,8 @@ This ensures:
 
 Dynamic JSON parsing is supported but not recommended for heavy workloads.
 
-> Codable is significantly faster and preferred for large or deeply nested responses.
+⚠️ Not recommended for complex or performance-sensitive scenarios
+> Codable is significantly 40x faster and preferred for large or deeply nested responses.
 
 ---
 
@@ -247,9 +248,6 @@ OR
 let userJSON = try await XXXAPIProvider.shared.request(XXXAPI.User.info)
 print(userJSON["name"].stringValue)
 ```
-
-⚠️ Not recommended for complex or performance-sensitive scenarios
-👉 Codable is strongly recommended, as it can be up to 40x faster than JSON parsing in benchmarks.
 
 ---
 

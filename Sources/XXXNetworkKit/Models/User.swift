@@ -7,8 +7,12 @@
 
 import Foundation
 
-public struct User: Codable {
-    let name: String?
-    let face: String?
-    let openid: String?
+extension Model {
+    
+    public struct User: Codable {
+        public let name: String?
+        public let face: String?
+        public let openid: String?
+    }
+    
 }
