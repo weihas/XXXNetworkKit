@@ -1,8 +1,32 @@
 import Testing
 @testable import XXXNetworkKit
 
-@Test func example() async throws {
-    // Write your test here and use APIs like `#expect(...)` to check expected conditions.
-    // Swift Testing Documentation
-    // https://developer.apple.com/documentation/testing
+@Suite
+struct UserTest {
+    
+    @Test
+    func scopes() async throws {
+        
+        struct Scope: Codable {
+            let scopes: [String]
+            let openid: String?
+        }
+        
+        let result = try await XXXAPIProvider.shared.request(XXXAPI.User.scopes, to: Scope.self)
+        #expect(!result.scopes.isEmpty)
+        #expect(result.openid != nil)
+    }
+    
+    @Test
+    func info() async throws {
+        let user = try await XXXAPIProvider.shared.request(XXXAPI.User.info, to: Model.User.self)
+        #expect(user.openid != nil)
+    }
+
+
+    @Test
+    func union_id() async throws {
+        let result = try await XXXAPIProvider.shared.request(XXXAPI.User.union_id)
+        #expect(result["union_id"].string != nil)
+    }
 }

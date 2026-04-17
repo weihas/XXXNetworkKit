@@ -22,7 +22,7 @@ package typealias Task = _Concurrency.Task
 
 // MARK: - Moya Async Extension
 
-extension MoyaProvider {
+package extension MoyaProvider {
 
     /// Performs a network request and returns a `Response` using Swift concurrency.
     ///
