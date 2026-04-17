@@ -8,7 +8,14 @@ A unified networking architecture built on top of Moya, Alamofire, and Swift Con
 
 # 📌 Naming
 
-The name XXXNetworkKit is intentionally designed as a placeholder, allowing developers to replace XXX with their own project or company prefix to form a customized networking framework name.
+The name XXXNetworkKit is a placeholder.
+
+
+Replace XXX with your project or company prefix:
+
+```
+XXXNetworkKit → MyAppNetworkKit / ABCNetworkKit
+```
 
 ---
 
@@ -22,7 +29,11 @@ XXXNetworkKit is a layered networking architecture designed to solve common prob
 - Mixing of raw JSON parsing and strongly-typed models
 - Tight coupling between business logic and networking layer
 
-The framework provides a unified, predictable, and extensible networking layer.
+  The framework provides a unified, predictable, and extensible networking layer.
+  
+  ✅ Goal:
+
+  > Build a **unified, predictable, and scalable** networking layer.
 
 ---
 
@@ -138,26 +149,91 @@ All networking errors conform to a unified protocol:
 
 ---
 
-# 🔄 Data Flow
+# 🧭 API Namespace Design
+
+To support large-scale APIs, the framework introduces namespace-based API organization.
+
+## Problem
+
+A single XXXAPI enum becomes:
+- Hard to maintain
+- Difficult to navigate
+- High merge conflict risk
+
+## Solution
+
+Group APIs by domain:
+
+```swift
+enum XXXAPI {
+    enum User {
+        case info
+        case login
+        case logout
+    }
+
+    enum Order {
+        case list
+        case detail(id: String)
+    }
+}
+```
+
+## Benefits
+- 📦 Clear domain separation
+- 🔍 Better code completion experience
+- 🧩 Easier modularization
+- 👥 Reduced team conflicts
+
+# 🧪 Test-Driven API Integration
+API integration is now test-driven.
+
+## Concept
+
+Instead of writing API calls inside business logic:
+
+👉 Write test cases first to complete API integration
+
+## Example
+```swift
+import Testing
+@testable import XXXNetworkKit
+
+@Suite
+struct UserTest {
+  
+    @Test
+    func info() async throws {
+        let user = try await XXXAPIProvider.shared.request(XXXAPI.User.info, to: Model.User.self)
+        #expect(user.openid != nil)
+    }
+
+
+    @Test
+    func union_id() async throws {
+        let result = try await XXXAPIProvider.shared.request(XXXAPI.User.union_id)
+        #expect(result["union_id"].string != nil)
+    }
+}
 
 ```
-API Call
-  ↓
-XXXAPIProvider.request()
-  ↓
-MoyaProvider (MultiTarget)
-  ↓
-URLSession
-  ↓
-HTTP Response
-  ↓
-BaseResponse Decoding
-  ↓
-Business Code Validation
-  ↓
-Data Extraction
-  ↓
-Codable Model / JSON
+
+## Advantages
+- ✅ No UI dependency
+- ✅ Faster debugging
+- ✅ Early backend validation
+- ✅ Strong type-safety verification
+
+# 🔄 Recommended Workflow
+
+```
+Define API (Namespace)
+        ↓
+Write Test Case
+        ↓
+Complete API Integration
+        ↓
+Develop Business Logic / UI
 ```
 
 ---
@@ -214,16 +290,6 @@ Dynamic JSON parsing is supported but not recommended for heavy workloads.
 
 ---
 
-# 🧱 Namespace Design
-
-Third-party dependencies are hidden behind typealiases:
-
-- Prevents external coupling
-- Simplifies public API surface
-- Improves modularity
-
----
-
 # 🧪 Usage Examples
 
 ## Request with Model
@@ -242,7 +308,9 @@ let user = try await XXXAPIProvider.shared.request(
 print(user.name)
 ```
 
-OR
+---
+
+## Request with JSON
 
 ```swift
 let userJSON = try await XXXAPIProvider.shared.request(XXXAPI.User.info)
@@ -302,10 +370,3 @@ XXXNetworkKit is a production-ready networking architecture that:
 - Centralizes error handling
 - Supports async/await concurrency model
 - Provides scalable architecture for large iOS applications
-
----
-
-# 📌 Philosophy
-
-> All network responses should be predictable, strongly typed, and centrally controlled.
-
