@@ -4,6 +4,8 @@ A unified networking architecture built on top of Moya, Alamofire, and Swift Con
 
 ⚠️ This is not intended as a plug-and-play library for direct dependency usage, but rather as an architectural design pattern demonstrating how to build a strongly-typed, scalable networking layer.
 
+*A Chinese version of this document can be found [here](https://github.com/weihas/XXXNetworkKit/blob/main/README_CN.md).*
+
 ---
 
 # 📌 Naming
@@ -40,13 +42,30 @@ XXXNetworkKit is a layered networking architecture designed to solve common prob
 # 🏗 Architecture
 
 ```
-Application Layer
-        ↓
-XXXAPIProvider (Unified Entry Point)
-        ↓
-Moya + Alamofire (Transport Layer)
-        ↓
-URLSession (System Layer)
+.
+├── Package.swift       
+├── README.md           
+├── Sources             
+│   └── XXXNetworkKit            
+│       ├── API
+│       │     │── XXXAPI.swift
+│       │     │── XXXAPI+User.swift
+│       │     └── XXXAPI+Article.swift
+│       ├── Errors
+│       │     │── XXXNetworkError.swift
+│       │     │── XXXNetworkMoyaError.swift
+│       │     │── XXXNetworkServerError.swift
+│       │     └── XXXNetworkWrappedError.swift
+│       ├── Helper        
+│       │     └── Helper.swift    
+│       ├── Plugins                        
+│       │     │── NetworkLoggerPlugin.swift
+│       │     └── NetworkLoggerPlugin.swift
+│       └── #XXXAPIProvider.swift           
+└── Tests
+       └── XXXNetworkKitTests
+       └── XXXNetworkKitTests.swift        
+
 ```
 
 ---
@@ -121,34 +140,6 @@ Decodable Model
 
 ---
 
-# ⚠️ Error Handling System
-
-## Unified Error Protocol
-
-All networking errors conform to a unified protocol:
-
-- Server errors
-- Transport errors
-- Wrapped custom errors
-
-### Error Types:
-
-- ServerError (business code errors)
-- MoyaError (transport layer)
-- WrappedError (fallback / unknown)
-
----
-
-## Error Strategy
-
-| Layer        | Type of Error |
-|-------------|--------------|
-| HTTP Layer  | Network / Transport errors |
-| Business    | Server-defined error codes |
-| Fallback    | Wrapped custom errors |
-
----
-
 # 🧭 API Namespace Design
 
 To support large-scale APIs, the framework introduces namespace-based API organization.
@@ -185,8 +176,48 @@ enum XXXAPI {
 - 🧩 Easier modularization
 - 👥 Reduced team conflicts
 
+---
+
+# ⚠️ Error Handling System
+
+## Unified Error Protocol
+
+All networking errors conform to a unified protocol:
+
+- Server errors
+- Transport errors
+- Wrapped custom errors
+
+### Error Types:
+
+| Layer        | Type of Error |
+|-------------|--------------|
+| HTTP Layer  | Network / Transport errors |
+| Business    | Server-defined error codes |
+| Fallback    | Wrapped custom errors |
+---
+
+## Error Strategy
+
+```
+
+    Error
+    └── XXXNetworkError (All Network Error)
+            ├── XXXNetworkMoyaError (Transport errors)
+            ├── XXXNetworkServerError (Server-defined error codes)
+            └── XXXNetworkWrappedError (Wrapped custom errors)
+    
+```
+---
+
 # 🧪 Test-Driven API Integration
 API integration is now test-driven.
+
+In most cases, developers are reluctant to write test cases unless it is strictly required. Therefore, this framework adopts an approach where test cases are written during the API integration process.
+
+This not only speeds up integration—since there is no need to launch the entire app each time, and individual test methods can be run instead—but also ensures that test cases are naturally completed by the end of the integration.
+
+Writing test cases is no longer an extra burden, but becomes a standard part of the workflow. Moreover, when adding new APIs later, running all tests can also help uncover issues in previously implemented backend interfaces.
 
 ## Concept
 
@@ -328,6 +359,8 @@ try await XXXAPIProvider.shared.request(XXXAPI.User.delete)
 ---
 
 ## Error Handling
+
+Follow a progression where errors are handled from the smallest scope to the largest, and adhere to a flow where errors are initiated and ultimately handled at the upper layers. Avoid scattering error-handling logic throughout the entire process.
 
 ```swift
 do {
