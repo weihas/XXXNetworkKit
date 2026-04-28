@@ -1,6 +1,6 @@
 # 🚀 XXXNetworkKit
 
-A unified networking architecture built on top of Moya, Alamofire, and Swift Concurrency, designed as a reference implementation for standardizing API response structures, error handling, and request flow in iOS applications.
+A unified networking architecture built on top of Moya, Alamofire, SwiftyJSON, and Swift Concurrency, designed as a reference implementation for standardizing API response structures, error handling, and request flow in iOS applications.
 
 ⚠️ This is not intended as a plug-and-play library for direct dependency usage, but rather as an architectural design pattern demonstrating how to build a strongly-typed, scalable networking layer.
 
@@ -18,6 +18,12 @@ Replace XXX with your project or company prefix:
 ```
 XXXNetworkKit → MyAppNetworkKit / ABCNetworkKit
 ```
+
+Current package requirements:
+
+- Swift 6
+- iOS 16+
+- Swift Package Manager
 
 ---
 
@@ -56,12 +62,17 @@ XXXNetworkKit is a layered networking architecture designed to solve common prob
 │       │     │── XXXNetworkMoyaError.swift
 │       │     │── XXXNetworkServerError.swift
 │       │     └── XXXNetworkWrappedError.swift
-│       ├── Helper        
-│       │     └── Helper.swift    
-│       ├── Plugins                        
+│       ├── Helper
+│       │     │── Helper.swift
+│       │     │── NetworkReachabilityManager.swift
+│       │     └── Retry.swift
+│       ├── Plugins
 │       │     │── NetworkLoggerPlugin.swift
-│       │     └── NetworkLoggerPlugin.swift
+│       │     │── TimeoutPlugin.swift
+│       │     └── TimerLoggerPlugin.swift
 │       └── #XXXAPIProvider.swift           
+│   └── XXXNetworkModel
+│       └── Models
 └── Tests
        └── XXXNetworkKitTests
        └── XXXNetworkKitTests.swift        
@@ -90,6 +101,7 @@ XXXNetworkKit is a layered networking architecture designed to solve common prob
 - Custom URLSession configuration
 - Debug-only logging plugins
 - Swift Concurrency support
+- Default dynamic JSON decoding through SwiftyJSON
 
 ---
 
@@ -117,7 +129,7 @@ All backend responses are normalized into a standard format:
 
 ```json
 {
-  "code": 200,
+  "code": 0,
   "message": "success",
   "data": {},
   "request_id": "xxx"
@@ -131,12 +143,14 @@ HTTP Response (status 200)
         ↓
 BaseResponse<T>
         ↓
-Business Code Validation
+Business Code Validation (code == 0)
         ↓
 Data Extraction
         ↓
 Decodable Model
 ```
+
+In this implementation, HTTP status must be `200`, business success code is `0`, and unknown business codes are wrapped as `XXXNetworkWrappedError`.
 
 ---
 
@@ -229,13 +243,14 @@ Instead of writing API calls inside business logic:
 ```swift
 import Testing
 @testable import XXXNetworkKit
+@testable import XXXNetworkModel
 
 @Suite
 struct UserTest {
   
     @Test
     func info() async throws {
-        let user = try await XXXAPIProvider.shared.request(XXXAPI.User.info, to: Model.User.self)
+        let user = try await XXXAPIProvider.shared.request(XXXAPI.User.info, to: User.self)
         #expect(user.openid != nil)
     }
 
@@ -287,7 +302,8 @@ All backend responses must follow:
 {
   "code": Int,
   "message": String,
-  "data": Any?
+  "data": Any?,
+  "request_id": String
 }
 ```
 
@@ -296,6 +312,8 @@ This ensures:
 - Unified parsing logic
 - Centralized error handling
 - Backend contract consistency
+
+In the current implementation, `code == 0` means success. Other known codes should be added to `XXXNetworkServerError` and kept in sync with backend definitions.
 
 ---
 
@@ -353,8 +371,10 @@ print(userJSON["name"].stringValue)
 ## Request without Response
 
 ```swift
-try await XXXAPIProvider.shared.request(XXXAPI.User.delete)
+try await XXXAPIProvider.shared.request(XXXAPI.Article.delete(ids: [1, 2, 3]))
 ```
+
+If the backend omits `data`, the default `JSON` response becomes `JSON.null`.
 
 ---
 
@@ -388,9 +408,28 @@ do {
 The framework supports:
 
 - Custom plugins (logging / metrics / tracing)
+- TimeoutPlugin for custom request timeout behavior
+- Retry and polling helpers for async workflows
 - Custom error mapping
 - Alternative decoding strategies
 - Multi-target routing
+
+---
+
+# 🛠 Turning This Into Your Own Network Kit
+
+This repository is meant to be copied, renamed, and adapted to your own backend contract.
+
+Recommended steps:
+
+1. Rename `XXXNetworkKit`, `XXXAPI`, and error domains to your app or company prefix.
+2. Replace sample APIs such as `XXXAPI.User` and `XXXAPI.Article` with your own business domains.
+3. Update `BaseResponse<T>` in `Response.mapResult(to:)` to match your backend envelope.
+4. Replace `XXXNetworkServerError` with your backend business error codes.
+5. Decide whether `XXXNetworkModel` should stay as a separate target or move into your app modules.
+6. Keep the test-driven API workflow: every new API should have a focused integration test.
+
+After these steps, this project becomes your app's networking foundation rather than an external generic dependency.
 
 ---
 
