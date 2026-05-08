@@ -16,6 +16,18 @@
 XXXNetworkKit → MyAppNetworkKit / ABCNetworkKit
 ```
 
+可以在仓库根目录运行改名脚本：
+
+```sh
+swift Scripts/rename.swift MyApp
+```
+
+如需先预览改动：
+
+```sh
+swift Scripts/rename.swift MyApp --dry-run
+```
+
 当前 Package 要求：
 
 - Swift 6

@@ -19,6 +19,18 @@ Replace XXX with your project or company prefix:
 XXXNetworkKit → MyAppNetworkKit / ABCNetworkKit
 ```
 
+You can run the rename script from the repository root:
+
+```sh
+swift Scripts/rename.swift MyApp
+```
+
+Preview the changes first with:
+
+```sh
+swift Scripts/rename.swift MyApp --dry-run
+```
+
 Current package requirements:
 
 - Swift 6
