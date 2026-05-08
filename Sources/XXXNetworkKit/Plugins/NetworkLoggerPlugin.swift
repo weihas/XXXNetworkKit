@@ -14,16 +14,19 @@ extension NetworkLoggerPlugin {
     /// Custom LoggerPlugin
     public static let custom: NetworkLoggerPlugin = {
         
-        let logger = Logger(subsystem: "com.XXXNetworkKit.logger", category: "Moya")
-        
-        // 输出为curl + 返回body参数
+        // curl + body
         var configuration = NetworkLoggerPlugin.Configuration(logOptions: [.verbose, .requestBody])
         
-        // 采用log日志输出
-        configuration.output = { target, items in
-            for item in items {
-                logger.debug("\(item, privacy: .public)")
+        if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
+            let logger = Logger(subsystem: "com.XXXNetworkKit.logger", category: "Moya")
+            // Use system log output
+            configuration.output = { target, items in
+                for item in items {
+                    logger.debug("\(item, privacy: .public)")
+                }
             }
+        } else {
+            // Fallback on earlier versions
         }
         
         return NetworkLoggerPlugin(configuration: configuration)

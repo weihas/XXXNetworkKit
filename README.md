@@ -22,7 +22,8 @@ XXXNetworkKit → MyAppNetworkKit / ABCNetworkKit
 Current package requirements:
 
 - Swift 6
-- iOS 16+
+- iOS 13+
+- macOS 10.15+
 - Swift Package Manager
 
 ---
@@ -120,6 +121,12 @@ The framework wraps Moya's callback-based API into Swift structured concurrency.
 - Cooperative cancellation
 - Safe continuation handling
 - Unified response abstraction
+
+### Platform lock note
+
+The current package supports iOS 13+ and macOS 10.15+, so the async request wrapper uses an `NSLock`-based `LockIsolated` helper to protect cancellable state.
+
+If your project only supports iOS 16+ and macOS 13+, you can use Swift's `OSAllocatedUnfairLock` directly instead.
 
 ---
 

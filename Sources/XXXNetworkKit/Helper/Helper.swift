@@ -20,9 +20,24 @@ public typealias Parameter = Alamofire.Parameters
 package typealias Task = _Concurrency.Task
 
 
+private final class LockIsolated<Value>: @unchecked Sendable {
+    private var value: Value
+    private let lock = NSLock()
+
+    init(initialState: @autoclosure @Sendable () throws -> Value) rethrows {
+        self.value = try initialState()
+    }
+
+    func withLock<T: Sendable>(_ operation: @Sendable (inout Value) throws -> T) rethrows -> T {
+        lock.lock()
+        defer { lock.unlock() }
+        return try operation(&value)
+    }
+}
+
 // MARK: - Moya Async Extension
 
-package extension MoyaProvider {
+extension MoyaProvider {
 
     /// Performs a network request and returns a `Response` using Swift concurrency.
     ///
@@ -35,7 +50,13 @@ package extension MoyaProvider {
     /// - Returns: A `Response` object containing the server response.
     /// - Throws: A `MoyaError` if the request fails or is cancelled.
     func request(target: Target, progress: ProgressBlock? = nil) async throws -> Response {
-        let lock = OSAllocatedUnfairLock<Moya.Cancellable?>(initialState: nil)
+        
+        // Use OSAllocatedUnfairLock directly if the package only supports iOS 16+ and macOS 13+.
+        // Keep LockIsolated as the fallback while supporting older platforms such as macOS 11/12.
+        
+        // let lock = OSAllocatedUnfairLock<Moya.Cancellable?>(initialState: nil)
+        
+        let lock = LockIsolated<Moya.Cancellable?>(initialState: nil)
         
         return try await withTaskCancellationHandler {
             try await withCheckedThrowingContinuation { continuation in
@@ -59,7 +80,6 @@ package extension MoyaProvider {
                 
                 lock.withLock { $0 = cancellable }
             }
-            
         } onCancel: {
             // Cancel underlying Moya request when the Task is cancelled.
             lock.withLock { $0?.cancel() }
